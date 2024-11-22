@@ -107,4 +107,11 @@ const createComment = async ({ user_id, review_id, comment_text }) => {
   return response.rows[0];
 };
 
-module.exports = { client, createTables };
+module.exports = { 
+  client,
+  createTables,
+  createUser,
+  createReview,
+  createMovie,
+  createComment
+};
