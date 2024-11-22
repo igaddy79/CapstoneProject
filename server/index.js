@@ -10,7 +10,7 @@ const connectToDatabase = async () => {
     console.log("Connected to PostgreSQL database");
   } catch (err) {
     console.error("Error connecting to database:", err);
-    process.exit(1);
+   
   }
 };
 // Middleware
