@@ -2,7 +2,7 @@ const pg = require("pg");
 const uuid = require("uuid");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const JWT = process.env.JWT || "shhh";
+const JWT = process.env.JWT || "shhh";2
 
 const client = new pg.Client(
   process.env.DATABASE_URL || "postgres://localhost/movies_db"

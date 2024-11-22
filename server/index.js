@@ -1,3 +1,5 @@
+require('dotenv').config();
+const express = require("express");
 const { 
   client,
   createTables,
@@ -6,8 +8,17 @@ const {
 
 } = require("./db");
 
-const express = require("express");
 const app = express();
+const PORT = process.env.PORT || 3000;
+const connectToDatabase = async () => {
+  try {
+    await client.connect();
+ 
+  } catch (err) {
+    console.error("Error connecting to database:", err);
+   
+  }
+};
 
 const init = async () => {
   await client.connect();
@@ -28,3 +39,28 @@ const init = async () => {
 };
 
 init();
+
+// Middleware
+app.use(express.json());
+
+//database connection
+connectToDatabase().then(() => {
+  console.log("Database connected");
+
+  // connection
+  createTables().then(() => {
+    
+  });
+}).catch(err => {
+  console.error("Error during database setup", err);
+});
+
+// Route
+app.get("/", (req, res) => {
+  res.send("Database connection is successful!");
+});
+
+
+app.listen(PORT, () => {
+  console.log(`Server is running on http://localhost:${PORT}`);
+});
