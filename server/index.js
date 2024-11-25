@@ -56,8 +56,71 @@ connectToDatabase().then(() => {
 });
 
 // Route
-app.get("/", (req, res) => {
-  res.send("Database connection is successful!");
+app.get("/comments", async (req, res) => {
+  try {
+      const result = await client.query('SELECT * FROM comments;');
+      res.json(result.rows);
+  } catch (err) {
+      console.error(err);
+      res.status(500).send('Server Error');    
+  }
+});
+
+app.get('/comments/movie/:movieId', async (req, res) => {
+  const { movieId } = req.params;
+  try {
+      const result = await client.query('SELECT * FROM comments WHERE movie_id = $1;', [movieId]);
+      res.json(result.rows);
+  } catch (err) {
+      console.error(err);
+      res.status(500).send('Server Error');
+  }
+});
+
+app.post('/comments', async (req, res) => {
+  const { user_id, movie_id, comment_text } = req.body;
+  try {
+      const result = await client.query(
+          'INSERT INTO comments (user_id, movie_id, comment_text, created_at) VALUES ($1, $2, $3, NOW()) RETURNING *;',
+          [user_id, movie_id, comment_text]
+      );
+      res.status(201).json(result.rows[0]);
+  } catch (err) {
+      console.error(err);
+      res.status(500).send('Server Error');
+  }
+});
+
+app.put('/comments/:id', async (req, res) => {
+  const { id } = req.params;
+  const { comment_text } = req.body;
+  try {
+      const result = await client.query(
+          'UPDATE comments SET comment_text = $1 WHERE id = $2 RETURNING *;',
+          [comment_text, id]
+      );
+      if (result.rows.length === 0) {
+          return res.status(404).send('Comment not found');
+      }
+      res.json(result.rows[0]);
+  } catch (err) {
+      console.error(err);
+      res.status(500).send('Server Error');
+  }
+});
+
+app.delete('/comments/:id', async (req, res) => {
+  const { id } = req.params;
+  try {
+      const result = await client.query('DELETE FROM comments WHERE id = $1 RETURNING *;', [id]);
+      if (result.rows.length === 0) {
+          return res.status(404).send('Comment not found');
+      }
+      res.json({ message: 'Comment deleted successfully', comment: result.rows[0] });
+  } catch (err) {
+      console.error(err);
+      res.status(500).send('Server Error');
+  }
 });
 
 
