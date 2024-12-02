@@ -14,7 +14,7 @@ const PORT = process.env.PORT || 3000;
 
 // Enable CORS middleware
 app.use(cors({
-  origin: 'http://localhost:3001', // Frontend URL
+  origin: '*', // Allow all origins
   methods: ['GET', 'POST', 'PUT', 'DELETE'], 
   allowedHeaders: ['Content-Type', 'Authorization'], 
 }));
@@ -51,6 +51,7 @@ init();
 
 // Middleware
 app.use(express.json());
+//app.use(movieRoutes);
 
 //database connection
 connectToDatabase().then(() => {
@@ -132,6 +133,203 @@ app.delete('/comments/:id', async (req, res) => {
   }
 });
 
+// Create a movie
+app.post("/movies", async (req, res) => {
+  try {
+    const { title, description, image_url, genre } = req.body;
+    if (!title) {
+      return res.status(400).send({ error: "Title is required" });
+    }
+    const movie = await createMovie({ name: title, description, image: image_url, genre });
+    res.status(201).send(movie);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send({ error: "Failed to create movie" });
+  }
+});
+
+// Get all movies
+app.get("/movies", async (req, res) => {
+  try {
+    const result = await client.query("SELECT * FROM movies ORDER BY created_at DESC");
+    res.status(200).send(result.rows);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send({ error: "Failed to fetch movies" });
+  }
+});
+
+// Get a single movie by ID
+app.get("/movies/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const result = await client.query("SELECT * FROM movies WHERE id = $1", [id]);
+    if (result.rows.length === 0) {
+      return res.status(404).send({ error: "Movie not found" });
+    }
+    res.status(200).send(result.rows[0]);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send({ error: "Failed to fetch movie" });
+  }
+});
+
+// Update a movie by ID
+app.put("/movies/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { title, description, image_url, genre } = req.body;
+    const result = await client.query(
+      `
+      UPDATE movies 
+      SET title = COALESCE($1, title),
+          description = COALESCE($2, description),
+          image_url = COALESCE($3, image_url),
+          genre = COALESCE($4, genre),
+          updated_at = CURRENT_TIMESTAMP
+      WHERE id = $5
+      RETURNING *`,
+      [title, description, image_url, genre, id]
+    );
+    if (result.rows.length === 0) {
+      return res.status(404).send({ error: "Movie not found" });
+    }
+    res.status(200).send(result.rows[0]);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send({ error: "Failed to update movie" });
+  }
+});
+
+// Delete a movie by ID
+app.delete("/movies/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const result = await client.query("DELETE FROM movies WHERE id = $1 RETURNING *", [id]);
+    if (result.rows.length === 0) {
+      return res.status(404).send({ error: "Movie not found" });
+    }
+    res.status(200).send({ message: "Movie deleted successfully", movie: result.rows[0] });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send({ error: "Failed to delete movie" });
+  }
+});
+
+app.get("/reviews", async (req, res) => {
+  try {
+      const result = await client.query('SELECT * FROM reviews;');
+      res.json(result.rows);
+  } catch (err) {
+      console.error(err);
+      res.status(500).send('Server Error');    
+  }
+});
+
+// Create a review
+app.post("/reviews", async (req, res) => {
+  try {
+    const { user_id, movie_id, rating, review_text } = req.body;
+    if (!user_id || !movie_id || !rating) {
+      return res.status(400).send({ error: "User ID, Movie ID, and Rating are required" });
+    }
+    const SQL = `
+      INSERT INTO reviews (user_id, movie_id, rating, review_text)
+      VALUES ($1, $2, $3, $4)
+      RETURNING *;
+    `;
+    const result = await client.query(SQL, [user_id, movie_id, rating, review_text]);
+    res.status(201).send(result.rows[0]);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send({ error: "Failed to create review" });
+  }
+});
+
+// Get all reviews for a movie
+app.get("/movies/:movie_id/reviews", async (req, res) => {
+  try {
+    const { movie_id } = req.params;
+    const SQL = `
+      SELECT r.*, u.username 
+      FROM reviews r
+      JOIN users u ON r.user_id = u.id
+      WHERE r.movie_id = $1
+      ORDER BY r.created_at DESC;
+    `;
+    const result = await client.query(SQL, [movie_id]);
+    res.status(200).send(result.rows);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send({ error: "Failed to fetch reviews" });
+  }
+});
+
+// Get a single review by ID
+app.get("/reviews/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const SQL = `
+      SELECT r.*, u.username, m.title AS movie_title
+      FROM reviews r
+      JOIN users u ON r.user_id = u.id
+      JOIN movies m ON r.movie_id = m.id
+      WHERE r.id = $1;
+    `;
+    const result = await client.query(SQL, [id]);
+    if (result.rows.length === 0) {
+      return res.status(404).send({ error: "Review not found" });
+    }
+    res.status(200).send(result.rows[0]);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send({ error: "Failed to fetch review" });
+  }
+});
+
+// Update a review by ID
+app.put("/reviews/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { rating, review_text } = req.body;
+    const SQL = `
+      UPDATE reviews 
+      SET rating = COALESCE($1, rating),
+          review_text = COALESCE($2, review_text),
+          updated_at = CURRENT_TIMESTAMP
+      WHERE id = $3
+      RETURNING *;
+    `;
+    const result = await client.query(SQL, [rating, review_text, id]);
+    if (result.rows.length === 0) {
+      return res.status(404).send({ error: "Review not found" });
+    }
+    res.status(200).send(result.rows[0]);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send({ error: "Failed to update review" });
+  }
+});
+
+// Delete a review by ID
+app.delete("/reviews/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const SQL = `
+      DELETE FROM reviews 
+      WHERE id = $1
+      RETURNING *;
+    `;
+    const result = await client.query(SQL, [id]);
+    if (result.rows.length === 0) {
+      return res.status(404).send({ error: "Review not found" });
+    }
+    res.status(200).send({ message: "Review deleted successfully", review: result.rows[0] });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send({ error: "Failed to delete review" });
+  }
+});
 
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
