@@ -1,122 +1,82 @@
 import React, { useEffect, useState } from 'react';
-//import './movies.css';
+import { useParams } from 'react-router-dom';
 
 const Movies = () => {
-  const [movies, setmovies] = useState([]);
+  const { id } = useParams(); // Get the movie id from the URL params
+  const [movieData, setMovieData] = useState(null); // Holds the movie, reviews, and comments data
   const [error, setError] = useState(null);
-  //const [newMovie, setNewMovie] = useState('');
-  //const [editMovieId, setEditMovieId] = useState(null);
-  //const [editMovieText, setEditMovieText] = useState('');
-  const moviesUrl = 'http://localhost:3000/movies';
-  
 
-  // Fetch movies (Read)
-  const fetchMovies = async () => {
+  const movieUrl = `http://localhost:3000/movies/${id}`; // URL to fetch all movie-related data
+
+  // Fetch all movie-related data (movie, reviews, and comments)
+  const fetchMovieData = async () => {
     try {
-      const response = await fetch(moviesUrl);
+      console.log(`Fetching movie data from ${movieUrl}`);
+      const response = await fetch(movieUrl);
       if (!response.ok) {
-        throw new Error('Failed to fetch movies');
+        throw new Error('Failed to fetch movie data');
       }
       const data = await response.json();
-      setmovies(data);
+      console.log('Fetched movie data:', data);
+      setMovieData(data);
     } catch (err) {
+      console.error('Error fetching movie data:', err);
       setError(err.message);
     }
   };
-  
+
   useEffect(() => {
-    fetchMovies();
-  }, []);
+    fetchMovieData();
+  }, [id]); // Fetch data again if movie id changes
 
-  
-  // Add a new Movie (Create)
-  // const handleAddMovie = async () => {
-  //   if (!newMovie.trim()) return;
-  //   try {
-  //     const response = await fetch(moviesUrl, {
-  //       method: 'POST',
-  //       headers: { 'Content-Type': 'application/json' },
-  //       body: JSON.stringify({ Movie_text: newMovie, review_id: 1 }), 
-  //     });
+  if (error) {
+    return <p className="error">{error}</p>;
+  }
 
-  //     if (!response.ok) {
-  //       throw new Error('Failed to add Movie');
-  //     }
+  if (!movieData) {
+    return <p>Loading movie details...</p>;
+  }
 
-  //     const addedMovie = await response.json();
-  //     setmovies((prevmovies) => [...prevmovies, addedMovie]);
-  //     setNewMovie('');
-  //   } catch (err) {
-  //     setError(err.message);
-  //   }
-  // };
-
-  // // Edit an existing Movie (Update)
-  // const handleEditMovie = async (id) => {
-  //   if (!editMovieText.trim()) return;
-  //   try {
-  //     const response = await fetch(`${moviesUrl}/${id}`, {
-  //       method: 'PUT',
-  //       headers: { 'Content-Type': 'application/json' },
-  //       body: JSON.stringify({ Movie_text: editMovieText }),
-  //     });
-
-  //     if (!response.ok) {
-  //       throw new Error('Failed to update Movie');
-  //     }
-
-  //     const updatedMovie = await response.json();
-  //     setmovies((prevmovies) =>
-  //       prevmovies.map((Movie) =>
-  //         Movie.id === id ? updatedMovie : Movie
-  //       )
-  //     );
-  //     setEditMovieId(null);
-  //     setEditMovieText('');
-  //   } catch (err) {
-  //     setError(err.message);
-  //   }
-  // };
-
-  // // Delete a Movie (Delete)
-  // const handleDeleteMovie = async (id) => {
-  //   try {
-  //     const response = await fetch(`${moviesUrl}/${id}`, { method: 'DELETE' });
-
-  //     if (!response.ok) {
-  //       throw new Error('Failed to delete Movie');
-  //     }
-
-  //     setmovies((prevmovies) =>
-  //       prevmovies.filter((Movie) => Movie.id !== id)
-  //     );
-  //   } catch (err) {
-  //     setError(err.message);
-  //   }
-  // };
+  const { movie, reviews, comments } = movieData; // Assuming response structure
 
   return (
     <div className="movies-container">
-      <h1>movies</h1>
-      {error && <p className="error">{error}</p>}
-    
-      <ul>
-        {movies.map((Movie) => (
-          <li key={Movie.id} className="Movie-item">
-            {Movie === Movie.id ? (
-              <div>
-                </div>
-            ) : (
-              <div>
-                
-              </div>
-            )}
-          </li>
-        ))}
-      </ul>
+      <h1>Movie Details</h1>
+      {movie && (
+        <div className="movie-detail">
+          <h2>{movie.title}</h2>
+          <p>{movie.description}</p>
+          <img src={movie.poster_url} alt={movie.title} />
+        </div>
+      )}
+
+      <h2>Reviews</h2>
+      {reviews && reviews.length > 0 ? (
+        <ul>
+          {reviews.map((review) => (
+            <li key={review.id}>
+              <p>{review.text}</p>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p>No reviews available.</p>
+      )}
+
+      <h2>Comments</h2>
+      {comments && comments.length > 0 ? (
+        <ul>
+          {comments.map((comment) => (
+            <li key={comment.id}>
+              <p>{comment.comment_text}</p>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p>No comments available.</p>
+      )}
     </div>
   );
 };
 
 export default Movies;
-

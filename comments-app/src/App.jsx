@@ -1,9 +1,9 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { Route, BrowserRouter as Router, Routes } from 'react-router-dom';
 import Movies from './components/Movies';
-import MovieDetails from './components/MovieDetails.jsx';
-import Reviews from './components/Reviews';
-import Comments from './components/Comments';
+
+//import Reviews from './components/Reviews';
+//import Comments from './components/Comments';
 
 function App() {
   return (
@@ -11,9 +11,7 @@ function App() {
       <div className="App">
         <Routes>
           <Route path="/" element={<Movies />} />
-          <Route path="/Movies/:id" element={<MovieDetails />} />
-          <Route path="/Reviews" element={<Reviews />} />
-          <Route path="/Comments" element={<Comments />} />
+          <Route path="/movies/:id" element={<Movies />} /> 
         </Routes>
       </div>
     </Router>
@@ -21,3 +19,6 @@ function App() {
 }
 
 export default App;
+
+// <Route path="/Reviews" element={<Reviews />} />
+// <Route path="/Comments" element={<Comments />} /> */}

@@ -12,12 +12,8 @@ const {
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Enable CORS middleware
-app.use(cors({
-  origin: '*', // Allow all origins
-  methods: ['GET', 'POST', 'PUT', 'DELETE'], 
-  allowedHeaders: ['Content-Type', 'Authorization'], 
-}));
+
+
 
 const connectToDatabase = async () => {
   try {
@@ -47,11 +43,17 @@ const init = async () => {
   //app.listen(port, () => console.log(`listening on port ${port}`));
 };
 
+
 init();
+app.use(cors({
+  origin: '*', // Allow all origins
+  methods: ['GET', 'POST', 'PUT', 'DELETE'], 
+  allowedHeaders: ['Content-Type', 'Authorization'], 
+}));
 
 // Middleware
 app.use(express.json());
-//app.use(movieRoutes);
+
 
 //database connection
 connectToDatabase().then(() => {
@@ -160,19 +162,81 @@ app.get("/movies", async (req, res) => {
 });
 
 // Get a single movie by ID
+// Get a single movie by ID, along with its reviews and comments
 app.get("/movies/:id", async (req, res) => {
+  const { id } = req.params;
   try {
-    const { id } = req.params;
-    const result = await client.query("SELECT * FROM movies WHERE id = $1", [id]);
+    // Query to fetch movie details along with related reviews and comments
+    const movieQuery = `
+      SELECT m.id AS movie_id, m.title, m.description, m.image_url, m.genre, 
+             m.average_rating, m.created_at, 
+             r.id AS review_id, r.rating, r.review_text, r.created_at AS review_created_at, 
+             c.id AS comment_id, c.comment_text, c.created_at AS comment_created_at
+      FROM movies m
+      LEFT JOIN reviews r ON r.movie_id = m.id
+      LEFT JOIN comments c ON c.review_id = r.id
+      WHERE m.id = $1
+      ORDER BY r.created_at DESC, c.created_at DESC;`;
+
+    const result = await client.query(movieQuery, [id]);
+
     if (result.rows.length === 0) {
       return res.status(404).send({ error: "Movie not found" });
     }
-    res.status(200).send(result.rows[0]);
+
+    // Organize the result into a more structured format
+    const movie = {
+      id: result.rows[0].movie_id,
+      title: result.rows[0].title,
+      description: result.rows[0].description,
+      image_url: result.rows[0].image_url,
+      genre: result.rows[0].genre,
+      average_rating: result.rows[0].average_rating,
+      created_at: result.rows[0].created_at,
+      reviews: [],
+    };
+
+    // Collect reviews and comments
+    let currentReview = null;
+    result.rows.forEach(row => {
+      if (currentReview && currentReview.id === row.review_id) {
+        // Add comments to the existing review
+        currentReview.comments.push({
+          id: row.comment_id,
+          comment_text: row.comment_text,
+          created_at: row.comment_created_at,
+        });
+      } else {
+        // Create a new review object
+        currentReview = {
+          id: row.review_id,
+          rating: row.rating,
+          review_text: row.review_text,
+          created_at: row.review_created_at,
+          comments: [],
+        };
+        // Add the review to the movie's reviews
+        movie.reviews.push(currentReview);
+
+        // Add the first comment for the review
+        if (row.comment_id) {
+          currentReview.comments.push({
+            id: row.comment_id,
+            comment_text: row.comment_text,
+            created_at: row.comment_created_at,
+          });
+        }
+      }
+    });
+
+    res.status(200).send(movie);
+
   } catch (error) {
     console.error(error);
-    res.status(500).send({ error: "Failed to fetch movie" });
+    res.status(500).send({ error: "Failed to fetch movie with reviews and comments" });
   }
 });
+
 
 // Update a movie by ID
 app.put("/movies/:id", async (req, res) => {

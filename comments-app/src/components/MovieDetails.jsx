@@ -15,16 +15,19 @@ const MovieDetails = () => {
   useEffect(() => {
     const fetchDetails = async () => {
       try {
+        // Fetch movie details
         const movieResponse = await fetch(movieUrl);
         if (!movieResponse.ok) throw new Error('Failed to fetch movie');
         const movieData = await movieResponse.json();
         setMovie(movieData);
 
+        // Fetch reviews
         const reviewsResponse = await fetch(reviewsUrl);
         if (!reviewsResponse.ok) throw new Error('Failed to fetch reviews');
         const reviewsData = await reviewsResponse.json();
         setReviews(reviewsData);
 
+        // Fetch comments
         const commentsResponse = await fetch(commentsUrl);
         if (!commentsResponse.ok) throw new Error('Failed to fetch comments');
         const commentsData = await commentsResponse.json();
