@@ -1,0 +1,17 @@
+img {
+    width: 80%;
+    height: 60%;
+    background-color: gray;
+    margin: 10px;
+}
+
+.movie-card {
+    width: 300px;
+    height: auto;
+    background-color: beige;
+    color: rgb(68, 68, 68);
+    border-radius: 10px;
+    box-shadow: 0 10px 10px black;
+    text-align: center;
+    padding-bottom: 25px;
+}

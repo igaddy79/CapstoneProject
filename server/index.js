@@ -1,31 +1,40 @@
+const cors = require("cors");
 require('dotenv').config();
 const express = require("express");
 const { 
   client,
   createTables,
   createUser,
-  createMovie
-
+  createMovie,
+  getAllMovies
 } = require("./db");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-const connectToDatabase = async () => {
-  try {
-    await client.connect();
+// middleware
+app.use(express.json());
+app.use(cors());
+
+// const connectToDatabase = async () => {
+//   try {
+//     await client.connect();
  
-  } catch (err) {
-    console.error("Error connecting to database:", err);
+//   } catch (err) {
+//     console.error("Error connecting to database:", err);
    
-  }
-};
+//   }
+// };
 
 const init = async () => {
+  // Connecting to database
   await client.connect();
   console.log("Connected to database");
+
+  // Create Tables
   await createTables();
   console.log("Tables created");
 
+  // Seed database with users and movies
   const [robert, sue, lisa, theMatrix, scarface, hamilton] = await Promise.all([
     createUser({ username: 'robert', password: 's3cr3t!!' , isAdmin: true }),
     createUser({ username: 'sue', password: 'paZwoRd24', isAdmin: false}), 
@@ -52,32 +61,38 @@ const init = async () => {
 
   console.log("Added seeded data");
 
+  // Server running 
   app.listen(PORT, () => console.log(`listening on port ${PORT}`));
 };
 
-init();
-
 // Middleware
-app.use(express.json());
+// app.use(express.json());
 
 //database connection
-connectToDatabase().then(() => {
-  console.log("Database connected");
+// connectToDatabase().then(() => {
+//   console.log("Database connected");
 
-  // connection
-  createTables().then(() => {
+//   // connection
+//   createTables().then(() => {
     
-  });
-}).catch(err => {
-  console.error("Error during database setup", err);
-});
+//   });
+// }).catch(err => {
+//   console.error("Error during database setup", err);
+// });
 
-// Route
+// Route to homepage
 app.get("/", (req, res) => {
   res.send("Database connection is successful!");
 });
 
-
-app.listen(PORT, () => {
-  console.log(`Server is running on http://localhost:${PORT}`);
+// Route to list of movies
+app.get("/movies", async (req, res) => {
+  const movies = await getAllMovies();
+  res.json(movies);
 });
+
+// app.listen(PORT, () => {
+//   console.log(`Server is running on http://localhost:${PORT}`);
+// });
+
+init();

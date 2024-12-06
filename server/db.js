@@ -20,7 +20,7 @@ const createTables = async () => {
   SQL = `
     CREATE TABLE movies(
         id SERIAL PRIMARY KEY,
-        title VARCHAR(255) UNIQUE NOT NULL,
+        name VARCHAR(255) UNIQUE NOT NULL,
         description TEXT,
         image_url VARCHAR(2083),
         genre VARCHAR(100),
@@ -34,7 +34,7 @@ const createTables = async () => {
     CREATE TABLE users (
     id SERIAL PRIMARY KEY,                            
     username VARCHAR(255) UNIQUE NOT NULL,            
-    password_hash VARCHAR(255) NOT NULL,              
+    password VARCHAR(255) NOT NULL,              
     is_admin BOOLEAN DEFAULT FALSE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,  
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP    
@@ -91,11 +91,11 @@ const createReview = async ({ user_id, movie_id, rating, review_text }) => {
   return response.rows[0];
 };
 
-const createMovie = async ({ name, description, image, genre }) => {
+const createMovie = async ({ name, description, image_url, genre }) => {
   const SQL = `
-      INSERT INTO movies(name, description, image, genre) VALUES($1, $2, $3, $4) RETURNING *
+      INSERT INTO movies(name, description, image_url, genre) VALUES($1, $2, $3, $4) RETURNING *
     `;
-  const response = await client.query(SQL, [name, description, image, genre]);
+  const response = await client.query(SQL, [name, description, image_url, genre]);
   return response.rows[0];
 };
 
@@ -107,11 +107,18 @@ const createComment = async ({ user_id, review_id, comment_text }) => {
   return response.rows[0];
 };
 
+const getAllMovies = async () => {
+  const SQL = 'SELECT * FROM movies';
+  const response = await client.query(SQL);
+  return response.rows[0];
+}
+
 module.exports = { 
   client,
   createTables,
   createUser,
   createReview,
   createMovie,
-  createComment
+  createComment,
+  getAllMovies
 };
