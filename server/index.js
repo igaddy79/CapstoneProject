@@ -90,11 +90,11 @@ app.get('/comments/movie/:movieId', async (req, res) => {
 });
 
 app.post('/comments', async (req, res) => {
-  const { user_id, movie_id, comment_text } = req.body;
+  const { user_id, review_id, comment_text } = req.body;
   try {
       const result = await client.query(
-          'INSERT INTO comments (user_id, movie_id, comment_text, created_at) VALUES ($1, $2, $3, NOW()) RETURNING *;',
-          [user_id, movie_id, comment_text]
+          'INSERT INTO comments(user_id, review_id, comment_text) VALUES($1, $2, $3) RETURNING *',
+          [user_id, review_id, comment_text]
       );
       res.status(201).json(result.rows[0]);
   } catch (err) {
@@ -184,7 +184,7 @@ app.get("/movies/:id", async (req, res) => {
       return res.status(404).send({ error: "Movie not found" });
     }
 
-    // Organize the result into a more structured format
+    
     const movie = {
       id: result.rows[0].movie_id,
       title: result.rows[0].title,
@@ -196,7 +196,7 @@ app.get("/movies/:id", async (req, res) => {
       reviews: [],
     };
 
-    // Collect reviews and comments
+    
     let currentReview = null;
     result.rows.forEach(row => {
       if (currentReview && currentReview.id === row.review_id) {
@@ -249,8 +249,7 @@ app.put("/movies/:id", async (req, res) => {
       SET title = COALESCE($1, title),
           description = COALESCE($2, description),
           image_url = COALESCE($3, image_url),
-          genre = COALESCE($4, genre),
-          updated_at = CURRENT_TIMESTAMP
+          genre = COALESCE($4, genre)
       WHERE id = $5
       RETURNING *`,
       [title, description, image_url, genre, id]

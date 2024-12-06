@@ -25,11 +25,11 @@ const Movies = () => {
       console.error('Error fetching movie data:', err);
       setError(err.message);
     }
-  }, [movieUrl]); // Dependency array includes movieUrl
+  }, [movieUrl]); 
 
   useEffect(() => {
     fetchMovieData();
-  }, [fetchMovieData]); // Dependency array includes fetchMovieData
+  }, [fetchMovieData]); 
 
   if (error) {
     return <p className="error">{error}</p>;
