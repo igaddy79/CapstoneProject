@@ -1,27 +1,16 @@
-require('dotenv').config();
+require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
-const { 
-  client,
-  createTables,
-  createUser,
-  createMovie
-
-} = require("./db");
+const { client, createTables, createUser, createMovie } = require("./db");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-
-
-
 const connectToDatabase = async () => {
   try {
     await client.connect();
- 
   } catch (err) {
     console.error("Error connecting to database:", err);
-   
   }
 };
 
@@ -32,120 +21,135 @@ const init = async () => {
   console.log("Tables created");
 
   const [robert, sue, lisa, theMatrix, scarface, hamilton] = await Promise.all([
-    createUser({ username: 'robert', password: 's3cr3t!!' , isAdmin: true }),
-    createUser({ username: 'sue', password: 'paZwoRd24', isAdmin: false}), 
-    createUser({ username: 'lisa', password: 'shhh', isAdmin: false }),
-    createMovie({ 
-      name: 'The Maxtrix', 
-      description: 'When a beautiful stranger leads computer hacker Neo to a forbidding underworld, he discovers the shocking truth--the life he knows is the elaborate deception of an evil cyber-intelligence.', 
-      image: 'https://m.media-amazon.com/images/I/613ypTLZHsL._SL1000_.jpg', 
-      genre: 'Sci-Fi'
+    createUser({ username: "robert", password: "s3cr3t!!", isAdmin: true }),
+    createUser({ username: "sue", password: "paZwoRd24", isAdmin: false }),
+    createUser({ username: "lisa", password: "shhh", isAdmin: false }),
+    createMovie({
+      name: "The Maxtrix",
+      description:
+        "When a beautiful stranger leads computer hacker Neo to a forbidding underworld, he discovers the shocking truth--the life he knows is the elaborate deception of an evil cyber-intelligence.",
+      image: "https://m.media-amazon.com/images/I/613ypTLZHsL._SL1000_.jpg",
+      genre: "Sci-Fi",
     }),
-    createMovie({ 
-      name: 'Scarface', 
-      description: 'Miami in the 1980s: a determined criminal-minded Cuban immigrant becomes the biggest drug smuggler in Florida, and is eventually undone by his own drug addiction.', 
-      image: 'https://fathead.com/cdn/shop/products/w6mp91aibxo6umta15yj.jpg?v=1699627349', 
-      genre: 'Crime'
+    createMovie({
+      name: "Scarface",
+      description:
+        "Miami in the 1980s: a determined criminal-minded Cuban immigrant becomes the biggest drug smuggler in Florida, and is eventually undone by his own drug addiction.",
+      image:
+        "https://fathead.com/cdn/shop/products/w6mp91aibxo6umta15yj.jpg?v=1699627349",
+      genre: "Crime",
     }),
-    createMovie({ 
-      name: 'Hamilton', 
-      description: 'The real life of one of Americas foremost founding fathers and first Secretary of the Treasury, Alexander Hamilton. Captured live on Broadway from the Richard Rodgers Theater with the original Broadway cast.', 
-      image: 'https://i5.walmartimages.com/asr/149d1fd0-2254-421f-89d8-fe8d0f879b2d.45ce4ae056c8c0b3b1fce677f437a252.jpeg?odnHeight=2000&odnWidth=2000&odnBg=FFFFFF', 
-      genre: 'History'
-    })
+    createMovie({
+      name: "Hamilton",
+      description:
+        "The real life of one of Americas foremost founding fathers and first Secretary of the Treasury, Alexander Hamilton. Captured live on Broadway from the Richard Rodgers Theater with the original Broadway cast.",
+      image:
+        "https://i5.walmartimages.com/asr/149d1fd0-2254-421f-89d8-fe8d0f879b2d.45ce4ae056c8c0b3b1fce677f437a252.jpeg?odnHeight=2000&odnWidth=2000&odnBg=FFFFFF",
+      genre: "History",
+    }),
   ]);
 
   app.listen(PORT, () => console.log(`listening on port ${PORT}`));
 };
 
 init();
-app.use(cors({
-  origin: '*', // Allow all origins
-  methods: ['GET', 'POST', 'PUT', 'DELETE'], 
-  allowedHeaders: ['Content-Type', 'Authorization'], 
-}));
+app.use(
+  cors({
+    origin: "*", // Allow all origins
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  })
+);
 
 // Middleware
 app.use(express.json());
 
-
 //database connection
-connectToDatabase().then(() => {
-  console.log("Database connected");
+connectToDatabase()
+  .then(() => {
+    console.log("Database connected");
 
-  // connection
-  createTables().then(() => {
-    
+    // connection
+    createTables().then(() => {});
+  })
+  .catch((err) => {
+    console.error("Error during database setup", err);
   });
-}).catch(err => {
-  console.error("Error during database setup", err);
-});
 
 // Route
 app.get("/comments", async (req, res) => {
   try {
-      const result = await client.query('SELECT * FROM comments;');
-      res.json(result.rows);
+    const result = await client.query("SELECT * FROM comments;");
+    res.json(result.rows);
   } catch (err) {
-      console.error(err);
-      res.status(500).send('Server Error');    
+    console.error(err);
+    res.status(500).send("Server Error");
   }
 });
 
-app.get('/comments/movie/:movieId', async (req, res) => {
+app.get("/comments/movie/:movieId", async (req, res) => {
   const { movieId } = req.params;
   try {
-      const result = await client.query('SELECT * FROM comments WHERE movie_id = $1;', [movieId]);
-      res.json(result.rows);
+    const result = await client.query(
+      "SELECT * FROM comments WHERE movie_id = $1;",
+      [movieId]
+    );
+    res.json(result.rows);
   } catch (err) {
-      console.error(err);
-      res.status(500).send('Server Error');
+    console.error(err);
+    res.status(500).send("Server Error");
   }
 });
 
-app.post('/comments', async (req, res) => {
+app.post("/comments", async (req, res) => {
   const { user_id, movie_id, comment_text } = req.body;
   try {
-      const result = await client.query(
-          'INSERT INTO comments (user_id, movie_id, comment_text, created_at) VALUES ($1, $2, $3, NOW()) RETURNING *;',
-          [user_id, movie_id, comment_text]
-      );
-      res.status(201).json(result.rows[0]);
+    const result = await client.query(
+      "INSERT INTO comments (user_id, movie_id, comment_text, created_at) VALUES ($1, $2, $3, NOW()) RETURNING *;",
+      [user_id, movie_id, comment_text]
+    );
+    res.status(201).json(result.rows[0]);
   } catch (err) {
-      console.error(err);
-      res.status(500).send('Server Error');
+    console.error(err);
+    res.status(500).send("Server Error");
   }
 });
 
-app.put('/comments/:id', async (req, res) => {
+app.put("/comments/:id", async (req, res) => {
   const { id } = req.params;
   const { comment_text } = req.body;
   try {
-      const result = await client.query(
-          'UPDATE comments SET comment_text = $1 WHERE id = $2 RETURNING *;',
-          [comment_text, id]
-      );
-      if (result.rows.length === 0) {
-          return res.status(404).send('Comment not found');
-      }
-      res.json(result.rows[0]);
+    const result = await client.query(
+      "UPDATE comments SET comment_text = $1 WHERE id = $2 RETURNING *;",
+      [comment_text, id]
+    );
+    if (result.rows.length === 0) {
+      return res.status(404).send("Comment not found");
+    }
+    res.json(result.rows[0]);
   } catch (err) {
-      console.error(err);
-      res.status(500).send('Server Error');
+    console.error(err);
+    res.status(500).send("Server Error");
   }
 });
 
-app.delete('/comments/:id', async (req, res) => {
+app.delete("/comments/:id", async (req, res) => {
   const { id } = req.params;
   try {
-      const result = await client.query('DELETE FROM comments WHERE id = $1 RETURNING *;', [id]);
-      if (result.rows.length === 0) {
-          return res.status(404).send('Comment not found');
-      }
-      res.json({ message: 'Comment deleted successfully', comment: result.rows[0] });
+    const result = await client.query(
+      "DELETE FROM comments WHERE id = $1 RETURNING *;",
+      [id]
+    );
+    if (result.rows.length === 0) {
+      return res.status(404).send("Comment not found");
+    }
+    res.json({
+      message: "Comment deleted successfully",
+      comment: result.rows[0],
+    });
   } catch (err) {
-      console.error(err);
-      res.status(500).send('Server Error');
+    console.error(err);
+    res.status(500).send("Server Error");
   }
 });
 
@@ -156,7 +160,12 @@ app.post("/movies", async (req, res) => {
     if (!title) {
       return res.status(400).send({ error: "Title is required" });
     }
-    const movie = await createMovie({ name: title, description, image: image_url, genre });
+    const movie = await createMovie({
+      name: title,
+      description,
+      image: image_url,
+      genre,
+    });
     res.status(201).send(movie);
   } catch (error) {
     console.error(error);
@@ -167,7 +176,9 @@ app.post("/movies", async (req, res) => {
 // Get all movies
 app.get("/movies", async (req, res) => {
   try {
-    const result = await client.query("SELECT * FROM movies ORDER BY created_at DESC");
+    const result = await client.query(
+      "SELECT * FROM movies ORDER BY created_at DESC"
+    );
     res.status(200).send(result.rows);
   } catch (error) {
     console.error(error);
@@ -212,7 +223,7 @@ app.get("/movies/:id", async (req, res) => {
 
     // Collect reviews and comments
     let currentReview = null;
-    result.rows.forEach(row => {
+    result.rows.forEach((row) => {
       if (currentReview && currentReview.id === row.review_id) {
         // Add comments to the existing review
         currentReview.comments.push({
@@ -244,13 +255,13 @@ app.get("/movies/:id", async (req, res) => {
     });
 
     res.status(200).send(movie);
-
   } catch (error) {
     console.error(error);
-    res.status(500).send({ error: "Failed to fetch movie with reviews and comments" });
+    res
+      .status(500)
+      .send({ error: "Failed to fetch movie with reviews and comments" });
   }
 });
-
 
 // Update a movie by ID
 app.put("/movies/:id", async (req, res) => {
@@ -283,11 +294,16 @@ app.put("/movies/:id", async (req, res) => {
 app.delete("/movies/:id", async (req, res) => {
   try {
     const { id } = req.params;
-    const result = await client.query("DELETE FROM movies WHERE id = $1 RETURNING *", [id]);
+    const result = await client.query(
+      "DELETE FROM movies WHERE id = $1 RETURNING *",
+      [id]
+    );
     if (result.rows.length === 0) {
       return res.status(404).send({ error: "Movie not found" });
     }
-    res.status(200).send({ message: "Movie deleted successfully", movie: result.rows[0] });
+    res
+      .status(200)
+      .send({ message: "Movie deleted successfully", movie: result.rows[0] });
   } catch (error) {
     console.error(error);
     res.status(500).send({ error: "Failed to delete movie" });
@@ -296,11 +312,11 @@ app.delete("/movies/:id", async (req, res) => {
 
 app.get("/reviews", async (req, res) => {
   try {
-      const result = await client.query('SELECT * FROM reviews;');
-      res.json(result.rows);
+    const result = await client.query("SELECT * FROM reviews;");
+    res.json(result.rows);
   } catch (err) {
-      console.error(err);
-      res.status(500).send('Server Error');    
+    console.error(err);
+    res.status(500).send("Server Error");
   }
 });
 
@@ -309,14 +325,21 @@ app.post("/reviews", async (req, res) => {
   try {
     const { user_id, movie_id, rating, review_text } = req.body;
     if (!user_id || !movie_id || !rating) {
-      return res.status(400).send({ error: "User ID, Movie ID, and Rating are required" });
+      return res
+        .status(400)
+        .send({ error: "User ID, Movie ID, and Rating are required" });
     }
     const SQL = `
       INSERT INTO reviews (user_id, movie_id, rating, review_text)
       VALUES ($1, $2, $3, $4)
       RETURNING *;
     `;
-    const result = await client.query(SQL, [user_id, movie_id, rating, review_text]);
+    const result = await client.query(SQL, [
+      user_id,
+      movie_id,
+      rating,
+      review_text,
+    ]);
     res.status(201).send(result.rows[0]);
   } catch (error) {
     console.error(error);
@@ -402,13 +425,11 @@ app.delete("/reviews/:id", async (req, res) => {
     if (result.rows.length === 0) {
       return res.status(404).send({ error: "Review not found" });
     }
-    res.status(200).send({ message: "Review deleted successfully", review: result.rows[0] });
+    res
+      .status(200)
+      .send({ message: "Review deleted successfully", review: result.rows[0] });
   } catch (error) {
     console.error(error);
     res.status(500).send({ error: "Failed to delete review" });
   }
-});
-
-app.listen(PORT, () => {
-  console.log(`Server is running on http://localhost:${PORT}`);
 });
