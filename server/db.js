@@ -1,9 +1,9 @@
-require('dotenv').config();
+require("dotenv").config();
 const { Client } = require("pg");
 
 // const pg = require("pg");
 // const uuid = require("uuid");
-// const bcrypt = require("bcrypt");
+const bcrypt = require("bcrypt");
 // const jwt = require("jsonwebtoken");
 // const JWT = process.env.JWT || "shhh";2
 
@@ -81,7 +81,9 @@ const createUser = async ({ username, password, is_admin }) => {
   const SQL = `
       INSERT INTO users(username, password_hash, is_admin) VALUES($1, $2, $3) RETURNING *
     `;
-  const response = await client.query(SQL, [username, password, is_admin]);
+  //hashing password with 10 salt rounds
+  const pass_hash = bcrypt.hash(password, 10);
+  const response = await client.query(SQL, [username, pass_hash, is_admin]);
   return response.rows[0];
 };
 
@@ -114,11 +116,11 @@ const createComment = async ({ user_id, review_id, comment_text }) => {
   return response.rows[0];
 };
 
-module.exports = { 
+module.exports = {
   client,
   createTables,
   createUser,
   createReview,
   createMovie,
-  createComment
+  createComment,
 };
