@@ -1,17 +1,25 @@
 import { useState } from "react";
+import { login } from "../api-logic";
 
 const Login = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!username || !password) {
       setErrorMessage("Both fields are required");
     } else {
       setErrorMessage("");
       // Handle login logic here (e.g., API call)
+      const user = {
+        username: username,
+        password: password,
+      };
+      const token = await login(user);
+      //storing authentication token in local storage
+      window.localStorage.setItem("token", token);
       console.log("Logging in:", { username, password });
     }
   };
