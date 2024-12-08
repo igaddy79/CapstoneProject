@@ -42,7 +42,7 @@ const createTables = async () => {
     id SERIAL PRIMARY KEY,                            
     username VARCHAR(255) UNIQUE NOT NULL,            
     password_hash VARCHAR(255) NOT NULL,              
-    is_admin BOOLEAN DEFAULT FALSE,
+    is_admin BOOLEAN DEFAULT FALSE NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,  
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP    
     );`;
@@ -82,7 +82,7 @@ const createUser = async ({ username, password, is_admin }) => {
       INSERT INTO users(username, password_hash, is_admin) VALUES($1, $2, $3) RETURNING *
     `;
   //hashing password with 10 salt rounds
-  const pass_hash = bcrypt.hash(password, 10);
+  const pass_hash = await bcrypt.hash(password, 10);
   const response = await client.query(SQL, [username, pass_hash, is_admin]);
   return response.rows[0];
 };
@@ -116,6 +116,14 @@ const createComment = async ({ user_id, review_id, comment_text }) => {
   return response.rows[0];
 };
 
+const fetchUsers = async () => {
+  const SQL = `
+    SELECT id, username, is_admin, created_at, updated_at FROM users
+  `;
+  const response = await client.query(SQL);
+  return response.rows;
+};
+
 module.exports = {
   client,
   createTables,
@@ -123,4 +131,5 @@ module.exports = {
   createReview,
   createMovie,
   createComment,
+  fetchUsers,
 };

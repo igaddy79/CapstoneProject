@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { addNewUser } from "../api-logic";
 
 function Signup() {
   const [username, setUsername] = useState("");
@@ -21,8 +22,14 @@ function Signup() {
     }
 
     setErrorMessage("");
+    // Handle signup logic here
+    const newUser = {
+      username: username,
+      password: password,
+      is_admin: false,
+    };
+    addNewUser(newUser);
 
-    // Handle signup logic here (e.g., API call)
     console.log("Signing up with:", { username, password });
   };
 

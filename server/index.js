@@ -1,7 +1,13 @@
 require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
-const { client, createTables, createUser, createMovie } = require("./db");
+const {
+  client,
+  createTables,
+  createUser,
+  createMovie,
+  fetchUsers,
+} = require("./db");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -21,9 +27,9 @@ const init = async () => {
   console.log("Tables created");
 
   const [robert, sue, lisa, theMatrix, scarface, hamilton] = await Promise.all([
-    createUser({ username: "robert", password: "s3cr3t!!", isAdmin: true }),
-    createUser({ username: "sue", password: "paZwoRd24", isAdmin: false }),
-    createUser({ username: "lisa", password: "shhh", isAdmin: false }),
+    createUser({ username: "robert", password: "s3cr3t!!", is_admin: true }),
+    createUser({ username: "sue", password: "paZwoRd24", is_admin: false }),
+    createUser({ username: "lisa", password: "shhh", is_admin: false }),
     createMovie({
       name: "The Maxtrix",
       description:
@@ -431,5 +437,28 @@ app.delete("/reviews/:id", async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).send({ error: "Failed to delete review" });
+  }
+});
+
+//add new user
+app.post("/users", async (req, res, next) => {
+  try {
+    res.send(
+      createUser({
+        username: req.body.username,
+        password: req.body.password,
+        is_admin: req.body.is_admin,
+      })
+    );
+  } catch (error) {
+    next(error);
+  }
+});
+
+app.get("/users", async (req, res, next) => {
+  try {
+    res.send(await fetchUsers());
+  } catch (error) {
+    next(error);
   }
 });
