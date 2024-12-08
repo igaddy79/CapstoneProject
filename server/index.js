@@ -7,6 +7,7 @@ const {
   createUser,
   createMovie,
   fetchUsers,
+  authenticate,
 } = require("./db");
 
 const app = express();
@@ -460,5 +461,14 @@ app.get("/users", async (req, res, next) => {
     res.send(await fetchUsers());
   } catch (error) {
     next(error);
+  }
+});
+
+//login route: takes in username and password, sends back a jwt
+app.post("/api/auth/login", async (req, res, next) => {
+  try {
+    res.send(await authenticate(req.body));
+  } catch (ex) {
+    next(ex);
   }
 });

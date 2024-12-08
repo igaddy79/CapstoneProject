@@ -4,8 +4,8 @@ const { Client } = require("pg");
 // const pg = require("pg");
 // const uuid = require("uuid");
 const bcrypt = require("bcrypt");
-// const jwt = require("jsonwebtoken");
-// const JWT = process.env.JWT || "shhh";2
+const jwt = require("jsonwebtoken");
+const JWT = process.env.JWT || "shhh";
 
 const client = new Client({
   user: process.env.DB_USER,
@@ -77,6 +77,26 @@ const createTables = async () => {
   console.log("comments table created");
 };
 
+const authenticate = async ({ username, password }) => {
+  const SQL = `
+    SELECT id, password_hash
+    FROM users
+    WHERE username = $1
+  `;
+  const response = await client.query(SQL, [username]);
+  //if username is not found or password is incorrect
+  if (
+    !response.rows.length ||
+    !(await bcrypt.compare(password, response.rows[0].password_hash))
+  ) {
+    const error = Error("not authorized");
+    error.status = 401;
+    throw error;
+  }
+  const token = await jwt.sign({ id: response.rows[0].id }, JWT);
+  return { token };
+};
+
 const createUser = async ({ username, password, is_admin }) => {
   const SQL = `
       INSERT INTO users(username, password_hash, is_admin) VALUES($1, $2, $3) RETURNING *
@@ -132,4 +152,5 @@ module.exports = {
   createMovie,
   createComment,
   fetchUsers,
+  authenticate,
 };
