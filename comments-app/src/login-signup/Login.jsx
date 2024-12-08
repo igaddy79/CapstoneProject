@@ -12,7 +12,6 @@ const Login = () => {
       setErrorMessage("Both fields are required");
     } else {
       setErrorMessage("");
-      // Handle login logic here (e.g., API call)
       const user = {
         username: username,
         password: password,

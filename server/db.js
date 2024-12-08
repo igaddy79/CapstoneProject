@@ -97,6 +97,25 @@ const authenticate = async ({ username, password }) => {
   return { token };
 };
 
+const findUserByToken = async (token) => {
+  let id;
+  try {
+    const payload = await jwt.verify(token, JWT);
+    id = payload.id;
+  } catch (ex) {
+    const error = Error("not authorized");
+    error.status = 401;
+    throw error;
+  }
+  const SQL = `
+    SELECT id, username
+    FROM users
+    WHERE id = $1
+  `;
+  const response = await client.query(SQL, [id]);
+  return response.rows[0];
+};
+
 const createUser = async ({ username, password, is_admin }) => {
   const SQL = `
       INSERT INTO users(username, password_hash, is_admin) VALUES($1, $2, $3) RETURNING *
@@ -153,4 +172,5 @@ module.exports = {
   createComment,
   fetchUsers,
   authenticate,
+  findUserByToken,
 };

@@ -8,6 +8,7 @@ const {
   createMovie,
   fetchUsers,
   authenticate,
+  findUserByToken,
 } = require("./db");
 
 const app = express();
@@ -70,6 +71,15 @@ app.use(
 
 // Middleware
 app.use(express.json());
+
+const isLoggedIn = async (req, res, next) => {
+  try {
+    req.user = await findUserByToken(req.headers.authorization);
+    next();
+  } catch (ex) {
+    next(ex);
+  }
+};
 
 //database connection
 connectToDatabase()
