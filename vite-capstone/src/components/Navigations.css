@@ -1,0 +1,29 @@
+.navbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    color:  rgb(103, 150, 225);
+    background-color:  rgb(103, 150, 225);
+    padding: 10px;
+    z-index: 100;
+}
+
+.links {
+    background-color:  rgb(103, 150, 225);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 15px;
+}
+
+.link {
+    background-color: rgb(103, 150, 225);
+    border: 0.5 solid;
+    border-radius: 5px;
+    font-weight: bold;
+    color: white;
+    cursor: pointer;
+    padding: 10px;
+    margin: 12px;
+}
