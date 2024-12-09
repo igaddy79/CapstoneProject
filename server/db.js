@@ -94,10 +94,22 @@ const createReview = async ({ user_id, movie_id, rating, review_text }) => {
 const createMovie = async ({ name, description, image_url, genre }) => {
   const SQL = `
       INSERT INTO movies(name, description, image_url, genre) VALUES($1, $2, $3, $4) RETURNING *
-    `;
+  `;
   const response = await client.query(SQL, [name, description, image_url, genre]);
   return response.rows[0];
 };
+
+// inserting multiple movies
+const createMovies = async (movies) => {
+  const insertedMovies = [];
+
+  for (let i=0; i < movies.length; i++) {
+    const movie = movies[i];
+    const insertedMovie = await createMovie(movie);
+    insertedMovies.push(insertedMovie);
+  }
+  return insertedMovies;
+}
 
 const createComment = async ({ user_id, review_id, comment_text }) => {
   const SQL = `
@@ -110,7 +122,7 @@ const createComment = async ({ user_id, review_id, comment_text }) => {
 const getAllMovies = async () => {
   const SQL = 'SELECT * FROM movies';
   const response = await client.query(SQL);
-  return response.rows[0];
+  return response.rows;
 }
 
 module.exports = { 
@@ -120,5 +132,6 @@ module.exports = {
   createReview,
   createMovie,
   createComment,
-  getAllMovies
+  getAllMovies,
+  createMovies
 };

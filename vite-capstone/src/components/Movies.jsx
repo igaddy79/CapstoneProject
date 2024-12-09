@@ -4,7 +4,10 @@ import MovieCard from './MovieCard';
 
 export default function Movies () {
     const [movies, setMovies] = useState([]);
-    console.log(movies);
+
+    useEffect(() => {
+        console.log(movies.length);
+    }, [movies]);
 
     const fetchAllMovies = async () => {
         const response = await fetch(`http://localhost:3000/movies`);
@@ -16,7 +19,6 @@ export default function Movies () {
         const getAllMovies = async () => {
             try {
                 const movies = await fetchAllMovies();
-                console.log(movies);
                 setMovies(movies);
             } catch (error) {
                 console.error("Whoops, there was an error fetching all movies");
@@ -25,8 +27,9 @@ export default function Movies () {
         getAllMovies();
     }, []);
 
+
     return (
-        <div>
+        <div className="movie-card-container">
          {
             movies.length > 0 ? (
                 movies.map((movie) => {
