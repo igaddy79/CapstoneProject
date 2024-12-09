@@ -8,6 +8,7 @@ export default function App() {
   return (
     <div>
       <Routes>
+        <Route path="/" element={<Movies />} />
         <Route path="/movies" element={<Movies />} />
       </Routes>
     </div>
