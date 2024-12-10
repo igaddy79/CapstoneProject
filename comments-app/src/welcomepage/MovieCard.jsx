@@ -8,7 +8,11 @@ export default function MovieCard({ movie }) {
       {/* <p className="movie-description">{movie.description}</p> */}
       {/* <img src={movie.image_url} alt={movie.name} /> */}
       {movie.image_url ? (
-        <img src={movie.image_url} alt={movie.name} />
+        <img
+          className="movie-card-img"
+          src={movie.image_url}
+          alt={movie.name}
+        />
       ) : (
         <p>No image available</p>
       )}

@@ -1,7 +1,0 @@
-const AdminPage = () => {
-  return (
-    <div>
-      <div></div>
-    </div>
-  );
-};
