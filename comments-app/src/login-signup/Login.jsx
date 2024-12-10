@@ -1,10 +1,12 @@
 import { useState } from "react";
 import { login } from "../api-logic";
+import { useNavigate } from "react-router-dom";
 
 const Login = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
+  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -18,8 +20,13 @@ const Login = () => {
       };
       const token = await login(user);
       //storing authentication token in local storage
-      window.localStorage.setItem("token", token);
-      console.log("Logging in:", { username, password });
+      if (token) {
+        window.localStorage.setItem("token", token);
+        console.log("Logging in:", { username, password });
+        navigate("/");
+      } else {
+        setErrorMessage("Could not authenticate user");
+      }
     }
   };
 

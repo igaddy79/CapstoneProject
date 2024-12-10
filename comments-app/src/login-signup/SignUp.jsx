@@ -1,11 +1,13 @@
 import React, { useState } from "react";
 import { addNewUser } from "../api-logic";
+import { useNavigate } from "react-router-dom";
 
 function Signup() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
+  const navigate = useNavigate();
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -31,6 +33,7 @@ function Signup() {
     addNewUser(newUser);
 
     console.log("Signing up with:", { username, password });
+    navigate("/");
   };
 
   return (
