@@ -9,6 +9,9 @@ const {
   fetchUsers,
   authenticate,
   findUserByToken,
+  getCommentsByUserId,
+  getReviewsByUserId,
+  seedDatabase,
 } = require("./db");
 
 const app = express();
@@ -56,6 +59,8 @@ const init = async () => {
       genre: "History",
     }),
   ]);
+
+  await seedDatabase();
 
   app.listen(PORT, () => console.log(`listening on port ${PORT}`));
 };
@@ -478,6 +483,31 @@ app.get("/users", async (req, res, next) => {
 app.post("/api/auth/login", async (req, res, next) => {
   try {
     res.send(await authenticate(req.body));
+  } catch (ex) {
+    next(ex);
+  }
+});
+
+app.get("/users/:id/comments", async (req, res, next) => {
+  try {
+    res.send(await getCommentsByUserId(req.params.id));
+  } catch (ex) {
+    next(ex);
+  }
+});
+
+app.get("/users/:id/reviews", async (req, res, next) => {
+  try {
+    res.send(await getReviewsByUserId(req.params.id));
+  } catch (ex) {
+    next(ex);
+  }
+});
+
+//returns id and username of logged in user
+app.get("/api/auth/me", isLoggedIn, (req, res, next) => {
+  try {
+    res.send(req.user);
   } catch (ex) {
     next(ex);
   }
