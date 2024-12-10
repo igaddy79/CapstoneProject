@@ -254,7 +254,6 @@ const createComment = async ({ user_id, review_id, comment_text }) => {
   return response.rows[0];
 };
 
-
 const fetchUsers = async () => {
   const SQL = `
     SELECT id, username, is_admin, created_at, updated_at FROM users
@@ -278,6 +277,15 @@ const getReviewsByUserId = async (id) => {
     WHERE user_id=$1
   `;
   const response = await client.query(SQL, [id]);
+  return response.rows;
+};
+
+const getAllMovies = async () => {
+  const SQL = `
+    SELECT id, title, description, image_url, genre, average_rating, created_at
+    FROM movies
+  `;
+  const response = await client.query(SQL);
   return response.rows;
 };
 
