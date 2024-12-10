@@ -1,12 +1,19 @@
-const pg = require("pg");
-const uuid = require("uuid");
-const bcrypt = require("bcrypt");
-const jwt = require("jsonwebtoken");
-const JWT = process.env.JWT || "shhh";2
+require('dotenv').config();
+const { Client } = require("pg");
 
-const client = new pg.Client(
-  process.env.DATABASE_URL || "postgres://localhost/movies_db"
-);
+// const pg = require("pg");
+// const uuid = require("uuid");
+// const bcrypt = require("bcrypt");
+// const jwt = require("jsonwebtoken");
+// const JWT = process.env.JWT || "shhh";2
+
+const client = new Client({
+  user: process.env.DB_USER,
+  host: process.env.DB_HOST,
+  database: process.env.DB_NAME,
+  password: process.env.DB_PASSWORD,
+  port: process.env.DB_PORT,
+});
 
 const createTables = async () => {
   let SQL = `
@@ -18,7 +25,7 @@ const createTables = async () => {
   await client.query(SQL);
   console.log("dropped all tables");
   SQL = `
-    CREATE TABLE movies(
+    CREATE TABLE IF NOT EXISTS movies(
         id SERIAL PRIMARY KEY,
         name VARCHAR(255) UNIQUE NOT NULL,
         description TEXT,
@@ -31,7 +38,7 @@ const createTables = async () => {
   await client.query(SQL);
   console.log("movies table created");
   SQL = `
-    CREATE TABLE users (
+    CREATE TABLE IF NOT EXISTS users (
     id SERIAL PRIMARY KEY,                            
     username VARCHAR(255) UNIQUE NOT NULL,            
     password VARCHAR(255) NOT NULL,              
@@ -42,7 +49,7 @@ const createTables = async () => {
   await client.query(SQL);
   console.log("users table created");
   SQL = `
-    CREATE TABLE reviews (
+    CREATE TABLE IF NOT EXISTS reviews (
     id SERIAL PRIMARY KEY,                            
     user_id INT NOT NULL,                             
     movie_id INT NOT NULL,                            
@@ -56,7 +63,7 @@ const createTables = async () => {
   await client.query(SQL);
   console.log("reviews table created");
   SQL = `
-    CREATE TABLE comments (
+    CREATE TABLE IF NOT EXISTS comments (
     id SERIAL PRIMARY KEY,                            
     user_id INT NOT NULL,                             
     review_id INT NOT NULL,                           
@@ -72,7 +79,7 @@ const createTables = async () => {
 
 const createUser = async ({ username, password, is_admin }) => {
   const SQL = `
-      INSERT INTO users(username, password, is_admin) VALUES($1, $2, $3) RETURNING *
+      INSERT INTO users(username, password_hash, is_admin) VALUES($1, $2, $3) RETURNING *
     `;
   const response = await client.query(SQL, [username, password, is_admin]);
   return response.rows[0];
