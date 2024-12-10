@@ -41,7 +41,8 @@ const createTables = async () => {
     CREATE TABLE IF NOT EXISTS users (
     id SERIAL PRIMARY KEY,                            
     username VARCHAR(255) UNIQUE NOT NULL,            
-    password_hash VARCHAR(255) NOT NULL,              
+
+    password VARCHAR(255) NOT NULL,              
     is_admin BOOLEAN DEFAULT FALSE NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,  
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP    
@@ -160,7 +161,7 @@ const seedDatabase = async () => {
 
 const authenticate = async ({ username, password }) => {
   const SQL = `
-    SELECT id, password_hash
+    SELECT id, password
     FROM users
     WHERE username = $1
   `;
@@ -168,7 +169,7 @@ const authenticate = async ({ username, password }) => {
   //if username is not found or password is incorrect
   if (
     !response.rows.length ||
-    !(await bcrypt.compare(password, response.rows[0].password_hash))
+    !(await bcrypt.compare(password, response.rows[0].password))
   ) {
     const error = Error("not authorized");
     error.status = 401;
@@ -199,7 +200,7 @@ const findUserByToken = async (token) => {
 
 const createUser = async ({ username, password, is_admin }) => {
   const SQL = `
-      INSERT INTO users(username, password_hash, is_admin) VALUES($1, $2, $3) RETURNING *
+      INSERT INTO users(username, password, is_admin) VALUES($1, $2, $3) RETURNING *
     `;
   //hashing password with 10 salt rounds
   const pass_hash = await bcrypt.hash(password, 10);
@@ -220,12 +221,29 @@ const createReview = async ({ user_id, movie_id, rating, review_text }) => {
   return response.rows[0];
 };
 
-const createMovie = async ({ name, description, image, genre }) => {
+const createMovie = async ({ name, description, image_url, genre }) => {
   const SQL = `
       INSERT INTO movies(title, description, image_url, genre) VALUES($1, $2, $3, $4) RETURNING *
-    `;
-  const response = await client.query(SQL, [name, description, image, genre]);
+  `;
+  const response = await client.query(SQL, [
+    name,
+    description,
+    image_url,
+    genre,
+  ]);
   return response.rows[0];
+};
+
+// inserting multiple movies
+const createMovies = async (movies) => {
+  const insertedMovies = [];
+
+  for (let i = 0; i < movies.length; i++) {
+    const movie = movies[i];
+    const insertedMovie = await createMovie(movie);
+    insertedMovies.push(insertedMovie);
+  }
+  return insertedMovies;
 };
 
 const createComment = async ({ user_id, review_id, comment_text }) => {
@@ -235,6 +253,7 @@ const createComment = async ({ user_id, review_id, comment_text }) => {
   const response = await client.query(SQL, [user_id, review_id, comment_text]);
   return response.rows[0];
 };
+
 
 const fetchUsers = async () => {
   const SQL = `
@@ -275,4 +294,6 @@ module.exports = {
   getCommentsByUserId,
   getReviewsByUserId,
   seedDatabase,
+  getAllMovies,
+  createMovies,
 };
