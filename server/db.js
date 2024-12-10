@@ -27,7 +27,7 @@ const createTables = async () => {
   SQL = `
     CREATE TABLE IF NOT EXISTS movies(
         id SERIAL PRIMARY KEY,
-        title VARCHAR(255) UNIQUE NOT NULL,
+        name VARCHAR(255) UNIQUE NOT NULL,
         description TEXT,
         image_url VARCHAR(2083),
         genre VARCHAR(100),
@@ -41,7 +41,7 @@ const createTables = async () => {
     CREATE TABLE IF NOT EXISTS users (
     id SERIAL PRIMARY KEY,                            
     username VARCHAR(255) UNIQUE NOT NULL,            
-    password_hash VARCHAR(255) NOT NULL,              
+    password VARCHAR(255) NOT NULL,              
     is_admin BOOLEAN DEFAULT FALSE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,  
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP    
@@ -98,13 +98,25 @@ const createReview = async ({ user_id, movie_id, rating, review_text }) => {
   return response.rows[0];
 };
 
-const createMovie = async ({ name, description, image, genre }) => {
+const createMovie = async ({ name, description, image_url, genre }) => {
   const SQL = `
-      INSERT INTO movies(title, description, image_url, genre) VALUES($1, $2, $3, $4) RETURNING *
-    `;
-  const response = await client.query(SQL, [name, description, image, genre]);
+      INSERT INTO movies(name, description, image_url, genre) VALUES($1, $2, $3, $4) RETURNING *
+  `;
+  const response = await client.query(SQL, [name, description, image_url, genre]);
   return response.rows[0];
 };
+
+// inserting multiple movies
+const createMovies = async (movies) => {
+  const insertedMovies = [];
+
+  for (let i=0; i < movies.length; i++) {
+    const movie = movies[i];
+    const insertedMovie = await createMovie(movie);
+    insertedMovies.push(insertedMovie);
+  }
+  return insertedMovies;
+}
 
 const createComment = async ({ user_id, review_id, comment_text }) => {
   const SQL = `
@@ -114,11 +126,19 @@ const createComment = async ({ user_id, review_id, comment_text }) => {
   return response.rows[0];
 };
 
+const getAllMovies = async () => {
+  const SQL = 'SELECT * FROM movies';
+  const response = await client.query(SQL);
+  return response.rows;
+}
+
 module.exports = { 
   client,
   createTables,
   createUser,
   createReview,
   createMovie,
-  createComment
+  createComment,
+  getAllMovies,
+  createMovies
 };
