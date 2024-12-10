@@ -33,3 +33,20 @@ export const login = async (userInfo) => {
     console.log("Error logging in:", error);
   }
 };
+
+export const checkAuth = async () => {
+  try {
+    const response = await fetch(`${API_URL}/api/auth/me`, {
+      headers: {
+        authorization: window.localStorage.getItem("token"),
+        "Content-Type": "application/json",
+      },
+    });
+    console.log("hey");
+    //converting response into json data
+    console.log("THIS IS OUR DATA", await response.json());
+    return response;
+  } catch (error) {
+    console.log("Error checking auth:", error);
+  }
+};
