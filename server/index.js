@@ -118,7 +118,7 @@ app.get("/", (req, res) => {
 // Route to list of movies
 app.get("/movies", async (req, res) => {
   const movies = await getAllMovies();
-  console.log("movies fetched: ", movies);
+  //console.log("movies fetched: ", movies);
   res.json(movies);
 });
 // Route
@@ -525,7 +525,7 @@ app.get("/users/:id/reviews", async (req, res, next) => {
   }
 });
 
-//returns id and username of logged in user
+//returns id, username, and is_admin status of logged in user
 app.get("/api/auth/me", isLoggedIn, (req, res, next) => {
   try {
     res.send(req.user);

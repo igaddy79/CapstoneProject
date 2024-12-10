@@ -190,7 +190,7 @@ const findUserByToken = async (token) => {
     throw error;
   }
   const SQL = `
-    SELECT id, username
+    SELECT id, username, is_admin
     FROM users
     WHERE id = $1
   `;
