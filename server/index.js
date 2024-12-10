@@ -1,5 +1,5 @@
 require("dotenv").config();
-const express = require("express");
+const express = require('express');
 const cors = require("cors");
 const {
   client,
@@ -121,6 +121,7 @@ app.get("/movies", async (req, res) => {
   console.log("movies fetched: ", movies);
   res.json(movies);
 });
+
 // Route
 app.get("/comments", async (req, res) => {
   try {
@@ -219,19 +220,17 @@ app.post("/movies", async (req, res) => {
 });
 
 // Get all movies
-app.get("/movies", async (req, res) => {
-  try {
-    const result = await client.query(
-      "SELECT * FROM movies ORDER BY created_at DESC"
-    );
-    res.status(200).send(result.rows);
-  } catch (error) {
-    console.error(error);
-    res.status(500).send({ error: "Failed to fetch movies" });
-  }
-});
-
-// Get a single movie by ID
+// app.get("/movies", async (req, res) => {
+//   try {
+//     const result = await client.query(
+//       "SELECT * FROM movies ORDER BY created_at DESC"
+//     );
+//     res.status(200).send(result.rows);
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).send({ error: "Failed to fetch movies" });
+//   }
+// });
 
 // Get a single movie by ID, along with its reviews and comments
 app.get("/movies/:id", async (req, res) => {
