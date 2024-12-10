@@ -14,7 +14,6 @@ const {
   seedDatabase,
   getAllMovies,
   createMovies,
-
 } = require("./db");
 
 const app = express();
@@ -23,7 +22,6 @@ const PORT = process.env.PORT || 3000;
 // middleware
 app.use(express.json());
 app.use(cors());
-
 
 const init = async () => {
   // Connecting to database
@@ -36,9 +34,9 @@ const init = async () => {
 
   // Seed database with users
   const [robert, sue, lisa, theMatrix, scarface, hamilton] = await Promise.all([
-    createUser({ username: "robert", password: "s3cr3t!!", isAdmin: true }),
-    createUser({ username: "sue", password: "paZwoRd24", isAdmin: false }),
-    createUser({ username: "lisa", password: "shhh", isAdmin: false }),
+    createUser({ username: "robert", password: "s3cr3t!!", is_admin: true }),
+    createUser({ username: "sue", password: "paZwoRd24", is_admin: false }),
+    createUser({ username: "lisa", password: "shhh", is_admin: false }),
   ]);
 
   // Seed database with movies
@@ -85,7 +83,6 @@ app.use(
   })
 );
 
-
 // Middleware
 app.use(express.json());
 
@@ -117,7 +114,6 @@ const isLoggedIn = async (req, res, next) => {
 app.get("/", (req, res) => {
   res.send("Database connection is successful!");
 });
-
 
 // Route to list of movies
 app.get("/movies", async (req, res) => {
@@ -221,7 +217,6 @@ app.post("/movies", async (req, res) => {
     res.status(500).send({ error: "Failed to create movie" });
   }
 });
-
 
 // Get all movies
 app.get("/movies", async (req, res) => {
@@ -540,4 +535,3 @@ app.get("/api/auth/me", isLoggedIn, (req, res, next) => {
 });
 
 init();
-
