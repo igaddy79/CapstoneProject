@@ -35,27 +35,13 @@ const init = async () => {
     createUser({ username: 'robert', password: 's3cr3t!!' , isAdmin: true }),
     createUser({ username: 'sue', password: 'paZwoRd24', isAdmin: false}), 
     createUser({ username: 'lisa', password: 'shhh', isAdmin: false }),
-    createMovie({ 
-      name: 'The Maxtrix', 
-      description: 'When a beautiful stranger leads computer hacker Neo to a forbidding underworld, he discovers the shocking truth--the life he knows is the elaborate deception of an evil cyber-intelligence.', 
-      image: 'https://m.media-amazon.com/images/I/613ypTLZHsL._SL1000_.jpg', 
-      genre: 'Sci-Fi'
-    }),
-    createMovie({ 
-      name: 'Scarface', 
-      description: 'Miami in the 1980s: a determined criminal-minded Cuban immigrant becomes the biggest drug smuggler in Florida, and is eventually undone by his own drug addiction.', 
-      image: 'https://fathead.com/cdn/shop/products/w6mp91aibxo6umta15yj.jpg?v=1699627349', 
-      genre: 'Crime'
-    }),
-    createMovie({ 
-      name: 'Hamilton', 
-      description: 'The real life of one of Americas foremost founding fathers and first Secretary of the Treasury, Alexander Hamilton. Captured live on Broadway from the Richard Rodgers Theater with the original Broadway cast.', 
-      image: 'https://i5.walmartimages.com/asr/149d1fd0-2254-421f-89d8-fe8d0f879b2d.45ce4ae056c8c0b3b1fce677f437a252.jpeg?odnHeight=2000&odnWidth=2000&odnBg=FFFFFF', 
-      genre: 'History'
-    })
-  ]);
 
-  app.listen(PORT, () => console.log(`listening on port ${PORT}`));
+    createMovie({ name: 'The Maxtrix', description: 'When a beautiful stranger leads computer hacker Neo to a forbidding underworld, he discovers the shocking truth--the life he knows is the elaborate deception of an evil cyber-intelligence.', image: 'https://m.media-amazon.com/images/I/613ypTLZHsL._SL1000_.jpg', genre: 'Sci-Fi'}),
+    createMovie({ name: 'Scarface', description: 'Miami in the 1980s: a determined criminal-minded Cuban immigrant becomes the biggest drug smuggler in Florida, and is eventually undone by his own drug addiction.', image: 'https://fathead.com/cdn/shop/products/w6mp91aibxo6umta15yj.jpg?v=1699627349', genre: 'Crime'}),
+    createMovie({ name: 'Hamilton', description: 'The real life of one of Americas foremost founding fathers and first Secretary of the Treasury, Alexander Hamilton. Captured live on Broadway from the Richard Rodgers Theater with the original Broadway cast.', image: 'https://i5.walmartimages.com/asr/149d1fd0-2254-421f-89d8-fe8d0f879b2d.45ce4ae056c8c0b3b1fce677f437a252.jpeg?odnHeight=2000&odnWidth=2000&odnBg=FFFFFF', genre: 'History'})
+  ])
+
+
 };
 
 init();
@@ -104,11 +90,11 @@ app.get('/comments/movie/:movieId', async (req, res) => {
 });
 
 app.post('/comments', async (req, res) => {
-  const { user_id, movie_id, comment_text } = req.body;
+  const { user_id, review_id, comment_text } = req.body;
   try {
       const result = await client.query(
-          'INSERT INTO comments (user_id, movie_id, comment_text, created_at) VALUES ($1, $2, $3, NOW()) RETURNING *;',
-          [user_id, movie_id, comment_text]
+          'INSERT INTO comments(user_id, review_id, comment_text) VALUES($1, $2, $3) RETURNING *',
+          [user_id, review_id, comment_text]
       );
       res.status(201).json(result.rows[0]);
   } catch (err) {
@@ -198,7 +184,7 @@ app.get("/movies/:id", async (req, res) => {
       return res.status(404).send({ error: "Movie not found" });
     }
 
-    // Organize the result into a more structured format
+    
     const movie = {
       id: result.rows[0].movie_id,
       title: result.rows[0].title,
@@ -210,7 +196,7 @@ app.get("/movies/:id", async (req, res) => {
       reviews: [],
     };
 
-    // Collect reviews and comments
+    
     let currentReview = null;
     result.rows.forEach(row => {
       if (currentReview && currentReview.id === row.review_id) {
@@ -263,8 +249,7 @@ app.put("/movies/:id", async (req, res) => {
       SET title = COALESCE($1, title),
           description = COALESCE($2, description),
           image_url = COALESCE($3, image_url),
-          genre = COALESCE($4, genre),
-          updated_at = CURRENT_TIMESTAMP
+          genre = COALESCE($4, genre)
       WHERE id = $5
       RETURNING *`,
       [title, description, image_url, genre, id]
