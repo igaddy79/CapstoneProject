@@ -6,15 +6,24 @@ const {
   createTables,
   createUser,
   createMovie,
+  fetchUsers,
+  authenticate,
+  findUserByToken,
+  getCommentsByUserId,
+  getReviewsByUserId,
+  seedDatabase,
   getAllMovies,
   createMovies,
+
 } = require("./db");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
 // middleware
 app.use(express.json());
 app.use(cors());
+
 
 const init = async () => {
   // Connecting to database
@@ -62,6 +71,8 @@ const init = async () => {
   const insertedMovies = await createMovies(moviesToInsert);
   console.log("Added movies: ", insertedMovies);
 
+  await seedDatabase();
+
   // Server running
   app.listen(PORT, () => console.log(`listening on port ${PORT}`));
 };
@@ -73,6 +84,20 @@ app.use(
     allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
+
+
+// Middleware
+app.use(express.json());
+
+const isLoggedIn = async (req, res, next) => {
+  try {
+    req.user = await findUserByToken(req.headers.authorization);
+    next();
+  } catch (ex) {
+    next(ex);
+  }
+};
+
 // Middleware
 // app.use(express.json());
 
@@ -92,6 +117,7 @@ app.use(
 app.get("/", (req, res) => {
   res.send("Database connection is successful!");
 });
+
 
 // Route to list of movies
 app.get("/movies", async (req, res) => {
@@ -195,6 +221,22 @@ app.post("/movies", async (req, res) => {
     res.status(500).send({ error: "Failed to create movie" });
   }
 });
+
+
+// Get all movies
+app.get("/movies", async (req, res) => {
+  try {
+    const result = await client.query(
+      "SELECT * FROM movies ORDER BY created_at DESC"
+    );
+    res.status(200).send(result.rows);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send({ error: "Failed to fetch movies" });
+  }
+});
+
+// Get a single movie by ID
 
 // Get a single movie by ID, along with its reviews and comments
 app.get("/movies/:id", async (req, res) => {
@@ -439,4 +481,63 @@ app.delete("/reviews/:id", async (req, res) => {
     res.status(500).send({ error: "Failed to delete review" });
   }
 });
+
+//add new user
+app.post("/users", async (req, res, next) => {
+  try {
+    res.send(
+      createUser({
+        username: req.body.username,
+        password: req.body.password,
+        is_admin: req.body.is_admin,
+      })
+    );
+  } catch (error) {
+    next(error);
+  }
+});
+
+app.get("/users", async (req, res, next) => {
+  try {
+    res.send(await fetchUsers());
+  } catch (error) {
+    next(error);
+  }
+});
+
+//login route: takes in username and password, sends back a jwt
+app.post("/api/auth/login", async (req, res, next) => {
+  try {
+    res.send(await authenticate(req.body));
+  } catch (ex) {
+    next(ex);
+  }
+});
+
+app.get("/users/:id/comments", async (req, res, next) => {
+  try {
+    res.send(await getCommentsByUserId(req.params.id));
+  } catch (ex) {
+    next(ex);
+  }
+});
+
+app.get("/users/:id/reviews", async (req, res, next) => {
+  try {
+    res.send(await getReviewsByUserId(req.params.id));
+  } catch (ex) {
+    next(ex);
+  }
+});
+
+//returns id and username of logged in user
+app.get("/api/auth/me", isLoggedIn, (req, res, next) => {
+  try {
+    res.send(req.user);
+  } catch (ex) {
+    next(ex);
+  }
+});
+
 init();
+

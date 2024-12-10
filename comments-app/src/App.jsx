@@ -1,21 +1,24 @@
 import React from "react";
-import {
-  BrowserRouter,
-  Route,
-  BrowserRouter as Router,
-  Routes,
-} from "react-router-dom";
+
+import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
 import Movies from "./components/Movies";
+import Login from "./login-signup/Login";
+import SignUp from "./login-signup/SignUp";
 import WelcomePage from "./welcomepage/WelcomePage";
+
 
 function App() {
   return (
     <Router>
       <div className="App">
         <Routes>
-          <Route path="/" element={<WelcomePage />} />
+
           <Route path="/movies/:id" element={<Movies />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<SignUp />} />
+          <Route path="/" element={<WelcomePage />} />
           <Route path="/movies" element={<WelcomePage />} />
+
         </Routes>
       </div>
     </Router>
