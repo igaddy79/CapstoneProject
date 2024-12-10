@@ -1,4 +1,4 @@
-require('dotenv').config();
+require("dotenv").config();
 const { Client } = require("pg");
 
 // const pg = require("pg");
@@ -27,7 +27,7 @@ const createTables = async () => {
   SQL = `
     CREATE TABLE IF NOT EXISTS movies(
         id SERIAL PRIMARY KEY,
-        name VARCHAR(255) UNIQUE NOT NULL,
+        title VARCHAR(255) UNIQUE NOT NULL,
         description TEXT,
         image_url VARCHAR(2083),
         genre VARCHAR(100),
@@ -79,7 +79,7 @@ const createTables = async () => {
 
 const createUser = async ({ username, password, is_admin }) => {
   const SQL = `
-      INSERT INTO users(username, password_hash, is_admin) VALUES($1, $2, $3) RETURNING *
+      INSERT INTO users(username, password, is_admin) VALUES($1, $2, $3) RETURNING *
     `;
   const response = await client.query(SQL, [username, password, is_admin]);
   return response.rows[0];
@@ -100,9 +100,14 @@ const createReview = async ({ user_id, movie_id, rating, review_text }) => {
 
 const createMovie = async ({ name, description, image_url, genre }) => {
   const SQL = `
-      INSERT INTO movies(name, description, image_url, genre) VALUES($1, $2, $3, $4) RETURNING *
+      INSERT INTO movies(title, description, image_url, genre) VALUES($1, $2, $3, $4) RETURNING *
   `;
-  const response = await client.query(SQL, [name, description, image_url, genre]);
+  const response = await client.query(SQL, [
+    name,
+    description,
+    image_url,
+    genre,
+  ]);
   return response.rows[0];
 };
 
@@ -110,13 +115,13 @@ const createMovie = async ({ name, description, image_url, genre }) => {
 const createMovies = async (movies) => {
   const insertedMovies = [];
 
-  for (let i=0; i < movies.length; i++) {
+  for (let i = 0; i < movies.length; i++) {
     const movie = movies[i];
     const insertedMovie = await createMovie(movie);
     insertedMovies.push(insertedMovie);
   }
   return insertedMovies;
-}
+};
 
 const createComment = async ({ user_id, review_id, comment_text }) => {
   const SQL = `
@@ -127,12 +132,12 @@ const createComment = async ({ user_id, review_id, comment_text }) => {
 };
 
 const getAllMovies = async () => {
-  const SQL = 'SELECT * FROM movies';
+  const SQL = "SELECT * FROM movies";
   const response = await client.query(SQL);
   return response.rows;
-}
+};
 
-module.exports = { 
+module.exports = {
   client,
   createTables,
   createUser,
@@ -140,5 +145,5 @@ module.exports = {
   createMovie,
   createComment,
   getAllMovies,
-  createMovies
+  createMovies,
 };
