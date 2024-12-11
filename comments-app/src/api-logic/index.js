@@ -33,3 +33,24 @@ export const login = async (userInfo) => {
     console.log("Error logging in:", error);
   }
 };
+
+export const getUserInfo = async (token) => {
+  try {
+    const response = await fetch(`${API_URL}/api/auth/me`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    if (response.ok) {
+      //converting response into json data
+      const user = await response.json();
+      return user;
+    } else {
+      throw new Error();
+    }
+  } catch (error) {
+    console.log("Error getting user info:", error);
+  }
+};

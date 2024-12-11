@@ -12,12 +12,13 @@ img {
   gap: 50px;
   margin: 50px;
   padding: 10px;
+  color: rgb(143, 0, 0);
 }
 
 .movie-card {
   width: 30%;
   height: auto;
-  background-color: beige;
+  background-color: rgb(236, 236, 236);
   color: rgb(68, 68, 68);
   border-radius: 10px;
   box-shadow: 0 10px 10px black;
@@ -28,10 +29,10 @@ img {
 }
 
 * {
-  background-color: white;
+  background-color: rgba(223, 146, 4, 0.788);
 }
 
 h2,
 p {
-  background-color: beige;
+  background-color: rgb(20, 20, 18);
 }

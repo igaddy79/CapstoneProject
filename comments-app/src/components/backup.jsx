@@ -1,10 +1,9 @@
-import React, { useCallback, useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
-import './Moviesstyles.css';
-
+import React, { useCallback, useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
+import "./Moviesstyles.css";
 
 const Movies = () => {
-  const { id } = useParams(); 
+  const { id } = useParams();
   const [movieData, setMovieData] = useState(null);
   const [error, setError] = useState(null);
 
@@ -14,26 +13,25 @@ const Movies = () => {
   const addComment = `http://localhost:3000/comments`;
   const editComment = `http://localhost:3000/reviews/${id}`;
 
-  
   const fetchMovieData = useCallback(async () => {
     try {
       console.log(`Fetching movie data from ${movieUrl}`);
       const response = await fetch(movieUrl);
       if (!response.ok) {
-        throw new Error('Failed to fetch movie data');
+        throw new Error("Failed to fetch movie data");
       }
       const data = await response.json();
-      console.log('Fetched movie data:', data);
+      console.log("Fetched movie data:", data);
       setMovieData(data);
     } catch (err) {
-      console.error('Error fetching movie data:', err);
+      console.error("Error fetching movie data:", err);
       setError(err.message);
     }
-  }, [movieUrl]); 
+  }, [movieUrl]);
 
   useEffect(() => {
     fetchMovieData();
-  }, [fetchMovieData]); 
+  }, [fetchMovieData]);
 
   if (error) {
     return <p className="error">{error}</p>;
@@ -47,7 +45,6 @@ const Movies = () => {
 
   return (
     <div className="movies-container">
-      
       <div className="movie-detail">
         <h2>{movie.title}</h2>
         <p>{movie.description}</p>
@@ -56,7 +53,6 @@ const Movies = () => {
         <p>Average Rating: {movie.average_rating}</p>
       </div>
 
-      
       <div className="reviews-section">
         <h3>Reviews:</h3>
         {movie.reviews.map((review) => (
@@ -66,7 +62,8 @@ const Movies = () => {
             <h4>Comments:</h4>
             {review.comments.map((comment) => (
               <p key={comment.id} className="comment">
-                {comment.comment_text} - {new Date(comment.created_at).toLocaleString()}
+                {comment.comment_text} -{" "}
+                {new Date(comment.created_at).toLocaleString()}
               </p>
             ))}
           </div>
