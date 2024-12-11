@@ -1,5 +1,5 @@
 import "./MovieCard.css";
-import Movies from "./WelcomePage";
+import WelcomePage from "./WelcomePage";
 import { useNavigate } from "react-router-dom";
 
 export default function MovieCard({ movie, isSingle }) {
@@ -26,7 +26,7 @@ export default function MovieCard({ movie, isSingle }) {
       <p className="movie-rating">Rating: {movie.average_rating}</p>
       {isSingle ? (
         <>
-          <Movies />
+          <WelcomePage />
           <div className="button-container">
             <button onClick={backButton} className="movie-card-button">Go Back</button>
           </div>

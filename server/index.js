@@ -33,7 +33,7 @@ const init = async () => {
   console.log("Tables created");
 
   // Seed database with users
-  const [robert, sue, lisa, theMatrix, scarface, hamilton] = await Promise.all([
+  const [robert, sue, lisa] = await Promise.all([
     createUser({ username: "robert", password: "s3cr3t!!", is_admin: true }),
     createUser({ username: "sue", password: "paZwoRd24", is_admin: false }),
     createUser({ username: "lisa", password: "shhh", is_admin: false }),
@@ -64,6 +64,12 @@ const init = async () => {
         "https://i5.walmartimages.com/asr/149d1fd0-2254-421f-89d8-fe8d0f879b2d.45ce4ae056c8c0b3b1fce677f437a252.jpeg?odnHeight=2000&odnWidth=2000&odnBg=FFFFFF",
       genre: "History",
     },
+    {
+      name: "Interstellar",
+      description: "When Earth becomes uninhabitable in the future, a farmer and ex-NASA pilot, Joseph Cooper, is tasked to pilot a spacecraft, along with a team of researchers, to find a new planet for humans.",
+      image_url: "https://cinesnark.com/wp-content/uploads/2014/11/interstellar-poster.jpg",
+      genre: "Sci-Fi"
+    }
   ];
 
   const insertedMovies = await createMovies(moviesToInsert);
