@@ -33,7 +33,7 @@ const init = async () => {
   console.log("Tables created");
 
   // Seed database with users
-  const [robert, sue, lisa, theMatrix, scarface, hamilton] = await Promise.all([
+  const [robert, sue, lisa] = await Promise.all([
     createUser({ username: "robert", password: "s3cr3t!!", is_admin: true }),
     createUser({ username: "sue", password: "paZwoRd24", is_admin: false }),
     createUser({ username: "lisa", password: "shhh", is_admin: false }),

@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { login } from "../api-logic";
+import './login-signup.css';
 
 const Login = () => {
   const [username, setUsername] = useState("");
@@ -25,7 +26,7 @@ const Login = () => {
 
   return (
     <div>
-      <div>
+      <div className="login">
         <h2>Login</h2>
         <form onSubmit={handleSubmit}>
           <label htmlFor="username">Username</label>

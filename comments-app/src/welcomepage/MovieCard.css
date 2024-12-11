@@ -17,7 +17,7 @@ img {
 .movie-card {
   width: 30%;
   height: auto;
-  background-color: beige;
+  background-color: rgb(191, 191, 191);
   color: rgb(68, 68, 68);
   border-radius: 10px;
   box-shadow: 0 10px 10px black;
@@ -33,5 +33,5 @@ img {
 
 h2,
 p {
-  background-color: beige;
+  background-color: rgb(191, 191, 191);
 }
