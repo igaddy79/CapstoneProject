@@ -65,10 +65,28 @@ const init = async () => {
       genre: "History",
     },
     {
-      name: "Interstellar",
-      description: "When Earth becomes uninhabitable in the future, a farmer and ex-NASA pilot, Joseph Cooper, is tasked to pilot a spacecraft, along with a team of researchers, to find a new planet for humans.",
-      image_url: "https://cinesnark.com/wp-content/uploads/2014/11/interstellar-poster.jpg",
-      genre: "Sci-Fi"
+      name: "Forrest Gump",
+      description: "The history of the United States from the 1950s to the '70s unfolds from the perspective of an Alabama man with an IQ of 75, who yearns to be reunited with his childhood sweetheart.",
+      image_url: "https://i.ebayimg.com/images/g/rHsAAOSwcqNi7LNX/s-l1600.jpg",
+      genre: "Drama",
+    },
+    {
+      name: "Spirited Away",
+      description: "During her family's move to the suburbs, a sullen 10-year-old girl wanders into a world ruled by gods, witches and spirits, and where humans are changed into beasts.",
+      image_url: "https://m.media-amazon.com/images/I/710ievVCTTL._SL1100_.jpg",
+      genre: "Anime",
+    },
+    {
+      name: "Wall-E",
+      description: "A robot who is responsible for cleaning a waste-covered Earth meets another robot and falls in love with her. Together, they set out on a journey that will alter the fate of mankind.",
+      image_url: "https://m.media-amazon.com/images/I/81K-KlDulqL._SL1500_.jpg",
+      genre: "Sci-Fi",
+    },
+    {
+      name: "Shutter Island",
+      description: "Two US marshals are sent to a mental institution on an inhospitable island in order to investigate the disappearance of a patient.",
+      image_url: "https://sdi4.chrislands.com/sdi/978/00/61/7/9780061703256.jpg",
+      genre: "Drama",
     }
   ];
 
