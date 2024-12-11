@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { addNewUser } from "../api-logic";
+import './login-signup.css';
 
 function Signup() {
   const [username, setUsername] = useState("");
